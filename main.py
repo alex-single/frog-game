@@ -43,19 +43,18 @@ class Groob(pygame.sprite.Sprite):
         super().__init__()
         #not finsihed
         self.animations = {
-            "idle": -1,
+            "idle": self.load_animation_frames("C:\\Users\\alexc\\Downloads\\Grooble\\groob art\\idle ani"),
             "walking": self.load_animation_frames("C:\\Users\\alexc\\Downloads\\groob art\\walking ani"),
-            "jumping": -1,
-            "hurt": -1,
+            
         }
-        
-        self.img = pygame.image.load("C:\\Users\\alexc\\Downloads\\Groob_img\\Untitled_Artwork 1.png").convert_alpha()
-        self.img = pygame.transform.scale(self.img, (25, 25))
+        self.frame_index = 0
+        self.img = self.animations[self.state][self.frame_index]
         self.rect = self.img.get_frect()
         self.x_velo = 0
         self.y_velo = 0
         self.onGround = False
         self.state = 'idle'
+        self.animation_timer = 0
         
         
     def load_animation_frames(self, folder_path):
@@ -66,7 +65,22 @@ class Groob(pygame.sprite.Sprite):
                 frame = pygame.transform.scale(frame, (25, 25))  # Adjust size
                 frames.append(frame)
         return frames
+    
+    def update_animation(self):
+        current_frames = self.animations[self.state]
+        self.animation_timer += 1
+        if self.animation_timer >= 10:  
+            self.animation_timer = 0
+            self.frame_index = (self.frame_index + 1) % len(current_frames)
+            self.img = current_frames[self.frame_index]
 
+    def update_state(self,keys):
+        if keys[pygame.K_a] or keys[pygame.K_d]:
+            self.state = 'walking'
+        else:
+            self.state = 'idle'
+            
+            
     def update(self, keys, gravity, window_width, window_height):
         
         
@@ -82,6 +96,7 @@ class Groob(pygame.sprite.Sprite):
             self.rect.x -= 5
         if keys[pygame.K_d]:
             self.rect.x += 5
+            
         
         #jump
         if keys[pygame.K_SPACE] and self.onGround:
